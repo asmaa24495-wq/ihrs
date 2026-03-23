@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Recruiter or company representative",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "companyName": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "recruiter"] }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "Job posting details",
+      "type": "object",
+      "properties": {
+        "jobTitle": { "type": "string" },
+        "description": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "experience": { "type": "number" },
+        "education": { "type": "string" },
+        "location": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" }
+      },
+      "required": ["jobTitle", "description", "userId"]
+    },
+    "Candidate": {
+      "title": "Candidate",
+      "description": "Candidate application and analysis",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "summary": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "experienceYears": { "type": "number" },
+        "education": { "type": "string" },
+        "matchScore": { "type": "number" },
+        "analysis": { "type": "object" },
+        "jobId": { "type": "string" },
+        "resumeText": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "shortlisted", "rejected", "reviewed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "jobId", "matchScore"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Job postings"
+    },
+    "/jobs/{jobId}/candidates/{candidateId}": {
+      "schema": "Candidate",
+      "description": "Candidates for a specific job"
+    }
+  }
+}
