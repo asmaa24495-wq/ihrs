@@ -72,7 +72,8 @@ const resources = {
       "invalid_email_password": "Invalid email or password",
       "account_created": "Account created successfully!",
       "logged_in": "Logged in successfully!",
-      "error_creating_account": "Error creating account. Please try again."
+      "error_creating_account": "Error creating account. Please try again.",
+      "google_login": "Sign in with Google"
     }
   },
   ar: {
@@ -144,7 +145,8 @@ const resources = {
       "invalid_email_password": "البريد الإلكتروني أو كلمة المرور غير صالحة",
       "account_created": "تم إنشاء الحساب بنجاح!",
       "logged_in": "تم تسجيل الدخول بنجاح!",
-      "error_creating_account": "خطأ في إنشاء الحساب. يرجى المحاولة مرة أخرى."
+      "error_creating_account": "خطأ في إنشاء الحساب. يرجى المحاولة مرة أخرى.",
+      "google_login": "تسجيل باستخدام جوجل"
     }
   }
 };

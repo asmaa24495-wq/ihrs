@@ -186,8 +186,10 @@ function Login() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
+      toast.success(t('logged_in'));
     } catch (error) {
       console.error('Login failed', error);
+      toast.error(t('invalid_email_password'));
     }
   };
 
@@ -259,8 +261,13 @@ function Login() {
         </div>
 
         <div className="space-y-4">
-          <Button variant="outline" className="w-full h-12 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-700" onClick={handleGoogleLogin}>
-            Google
+          <Button 
+            variant="outline" 
+            className="w-full h-12 flex items-center justify-center gap-3 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-700" 
+            onClick={handleGoogleLogin}
+          >
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google" />
+            {t('google_login')}
           </Button>
           
           <div className="text-center">
