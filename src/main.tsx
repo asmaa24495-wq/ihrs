@@ -5,10 +5,14 @@ import './index.css';
 import './i18n';
 import { ThemeProvider } from './ThemeContext';
 
+import { BrowserRouter as Router } from 'react-router-dom';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </Router>
   </StrictMode>,
 );

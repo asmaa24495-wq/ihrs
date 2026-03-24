@@ -73,7 +73,11 @@ const resources = {
       "account_created": "Account created successfully!",
       "logged_in": "Logged in successfully!",
       "error_creating_account": "Error creating account. Please try again.",
-      "google_login": "Sign in with Google"
+      "google_login": "Sign in with Google",
+      "popup_closed": "Login window was closed before completion. Please try again.",
+      "welcome_user": "Hello, {{email}} 👋",
+      "welcome_back": "Welcome back 👋",
+      "manage_system": "Manage your recruitment system"
     }
   },
   ar: {
@@ -146,7 +150,11 @@ const resources = {
       "account_created": "تم إنشاء الحساب بنجاح!",
       "logged_in": "تم تسجيل الدخول بنجاح!",
       "error_creating_account": "خطأ في إنشاء الحساب. يرجى المحاولة مرة أخرى.",
-      "google_login": "تسجيل باستخدام جوجل"
+      "google_login": "تسجيل باستخدام Google",
+      "popup_closed": "تم إغلاق نافذة تسجيل الدخول قبل الإكمال. يرجى المحاولة مرة أخرى.",
+      "welcome_user": "مرحبًا، {{email}} 👋",
+      "welcome_back": "مرحبًا بك 👋",
+      "manage_system": "إدارة نظام التوظيف الخاص بك"
     }
   }
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   onAuthStateChanged, 
   signOut, 
@@ -29,6 +29,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -39,7 +40,15 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          let userDoc;
+          try {
+            userDoc = await getDoc(userDocRef);
+          } catch (error) {
+            handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+            return;
+          }
+
           if (userDoc.exists()) {
             setUser({ uid: firebaseUser.uid, ...userDoc.data() } as User);
           } else {
@@ -48,13 +57,18 @@ function App() {
               uid: firebaseUser.uid,
               name: firebaseUser.displayName || 'Anonymous',
               email: firebaseUser.email || '',
+              photoURL: firebaseUser.photoURL || undefined,
               role: 'recruiter',
             };
-            await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
-            setUser(newUser);
+            try {
+              await setDoc(userDocRef, newUser);
+              setUser(newUser);
+            } catch (error) {
+              handleFirestoreError(error, OperationType.WRITE, `users/${firebaseUser.uid}`);
+            }
           }
         } catch (error) {
-          handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+          console.error('Auth state change error:', error);
         }
       } else {
         setUser(null);
@@ -81,76 +95,78 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors app-bg">
-        <Toaster position="top-center" richColors />
-        {/* Sidebar */}
-        <aside className="w-64 border-r border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm p-6 flex flex-col transition-colors">
-          <div className="flex items-center space-x-2 rtl:space-x-reverse mb-10">
-            <BrainCircuit className="h-8 w-8 text-zinc-900 dark:text-zinc-50" />
-            <span className="text-xl font-bold tracking-tight dark:text-zinc-50">{t('app_name')}</span>
-          </div>
+    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors app-bg">
+      <Toaster position="top-center" richColors />
+      {/* Sidebar */}
+      <aside className="w-64 border-r border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm p-6 flex flex-col transition-colors">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse mb-10">
+          <BrainCircuit className="h-8 w-8 text-zinc-900 dark:text-zinc-50" />
+          <span className="text-xl font-bold tracking-tight dark:text-zinc-50">{t('app_name')}</span>
+        </div>
 
-          <nav className="flex-1 space-y-1">
-            <NavLink to="/" icon={<LayoutDashboard size={18} />} label={t('dashboard')} />
-            <NavLink to="/candidates" icon={<Users size={18} />} label={t('candidates')} />
-            <NavLink to="/jobs/new" icon={<PlusCircle size={18} />} label={t('new_job')} />
-          </nav>
+        <nav className="flex-1 space-y-1">
+          <NavLink to="/" icon={<LayoutDashboard size={18} />} label={t('dashboard')} />
+          <NavLink to="/candidates" icon={<Users size={18} />} label={t('candidates')} />
+          <NavLink to="/jobs/new" icon={<PlusCircle size={18} />} label={t('new_job')} />
+        </nav>
 
-          <div className="mt-auto space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
-            {/* Theme & Language Switchers */}
-            <div className="flex items-center justify-between px-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleTheme}
-                className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-              >
-                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'ar' : 'en')}
-                className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-              >
-                <Languages size={18} />
-              </Button>
-            </div>
-
-            <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4 px-2">
-              <div className="h-8 w-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold dark:text-zinc-50">
-                {user.name[0]}
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-medium truncate dark:text-zinc-50">{user.name}</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{user.role}</p>
-              </div>
-            </div>
+        <div className="mt-auto space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+          {/* Theme & Language Switchers */}
+          <div className="flex items-center justify-between px-2">
             <Button 
               variant="ghost" 
-              className="w-full justify-start text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
-              onClick={() => signOut(auth)}
+              size="icon" 
+              onClick={toggleTheme}
+              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
             >
-              <LogOut size={18} className="mr-2 rtl:ml-2 rtl:mr-0" />
-              {t('sign_out')}
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'ar' : 'en')}
+              className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+            >
+              <Languages size={18} />
             </Button>
           </div>
-        </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto p-8">
-          <Routes>
-            <Route path="/" element={<Dashboard user={user} />} />
-            <Route path="/candidates" element={<Candidates user={user} />} />
-            <Route path="/jobs/new" element={<CreateJob user={user} />} />
-            <Route path="/jobs/:jobId/edit" element={<CreateJob user={user} />} />
-            <Route path="/jobs/:jobId" element={<JobDetails user={user} />} />
-            <Route path="/jobs/:jobId/candidates/:candidateId" element={<CandidateDetails user={user} />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+          <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4 px-2">
+            <div className="h-8 w-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold dark:text-zinc-50 overflow-hidden">
+              {user.photoURL ? (
+                <img src={user.photoURL} className="h-full w-full object-cover" alt={user.name} referrerPolicy="no-referrer" />
+              ) : (
+                user.name[0]
+              )}
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-medium truncate dark:text-zinc-50">{user.name}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{user.role}</p>
+            </div>
+          </div>
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
+            onClick={() => signOut(auth)}
+          >
+            <LogOut size={18} className="mr-2 rtl:ml-2 rtl:mr-0" />
+            {t('sign_out')}
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto p-8">
+        <Routes>
+          <Route path="/" element={<Dashboard user={user} />} />
+          <Route path="/candidates" element={<Candidates user={user} />} />
+          <Route path="/jobs/new" element={<CreateJob user={user} />} />
+          <Route path="/jobs/:jobId/edit" element={<CreateJob user={user} />} />
+          <Route path="/jobs/:jobId" element={<JobDetails user={user} />} />
+          <Route path="/jobs/:jobId/candidates/:candidateId" element={<CandidateDetails user={user} />} />
+        </Routes>
+      </main>
+    </div>
   );
 }
 
@@ -181,15 +197,28 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleGoogleLogin = async () => {
+    if (googleLoading) return;
+    setGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
       toast.success(t('logged_in'));
-    } catch (error) {
+      navigate('/');
+    } catch (error: any) {
       console.error('Login failed', error);
-      toast.error(t('invalid_email_password'));
+      if (error.code === 'auth/popup-closed-by-user') {
+        toast.error(t('popup_closed'));
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        // Ignore this one, it happens when another popup is opened
+      } else {
+        toast.error(t('invalid_email_password'));
+      }
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -205,6 +234,7 @@ function Login() {
         await signInWithEmailAndPassword(auth, email, password);
         toast.success(t('logged_in'));
       }
+      navigate('/');
     } catch (err: any) {
       const errorMessage = isSignUp ? t('error_creating_account') : t('invalid_email_password');
       setError(errorMessage);
@@ -265,8 +295,9 @@ function Login() {
             variant="outline" 
             className="w-full h-12 flex items-center justify-center gap-3 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-700" 
             onClick={handleGoogleLogin}
+            isLoading={googleLoading}
           >
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google" />
+            {!googleLoading && <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google" />}
             {t('google_login')}
           </Button>
           

@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from 'recharts';
+import { toast } from 'sonner';
 
 export default function Dashboard({ user }: { user: User }) {
   const { t } = useTranslation();
@@ -118,6 +119,14 @@ export default function Dashboard({ user }: { user: User }) {
     job.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleNotifications = () => {
+    toast.info(t('recent_activity'));
+  };
+
+  const handleProfile = () => {
+    toast.info(user.name);
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-20">
       {/* Top Bar */}
@@ -134,12 +143,24 @@ export default function Dashboard({ user }: { user: User }) {
         </div>
 
         <div className="flex items-center space-x-4 rtl:space-x-reverse">
-          <Button variant="ghost" size="icon" className="rounded-full relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full relative"
+            onClick={handleNotifications}
+          >
             <Bell size={20} className="text-zinc-500 dark:text-zinc-400" />
             <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-950" />
           </Button>
-          <div className="h-10 w-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-sm font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-700">
-            {user.name[0]}
+          <div 
+            className="h-10 w-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-sm font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-700 cursor-pointer overflow-hidden"
+            onClick={handleProfile}
+          >
+            {user.photoURL ? (
+              <img src={user.photoURL} className="h-full w-full object-cover" alt={user.name} referrerPolicy="no-referrer" />
+            ) : (
+              user.name[0]
+            )}
           </div>
         </div>
       </div>
@@ -148,23 +169,26 @@ export default function Dashboard({ user }: { user: User }) {
       <motion.div 
         initial={{ opacity: 0, y: -20 }} 
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-6"
+        className="space-y-2"
       >
-        <div>
+        <div className="flex flex-col space-y-1">
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 transition-colors">
-            Dashboard
+            {t('welcome_back')}
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 text-lg transition-colors">
-            Overview of your hiring system
+          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+            {t('welcome_user', { email: user.email })}
           </p>
         </div>
-
-        <Link to="/jobs/new">
-          <Button className="flex items-center gap-2 rounded-full px-8 h-12 shadow-lg hover:shadow-xl transition-all bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-bold">
-            <Plus size={20} /> {t('new_job')}
-          </Button>
-        </Link>
+        <p className="text-zinc-500 dark:text-zinc-400 text-lg transition-colors">
+          {t('manage_system')}
+        </p>
       </motion.div>
+
+      <Link to="/jobs/new">
+        <Button className="flex items-center gap-2 rounded-full px-8 h-12 shadow-lg hover:shadow-xl transition-all bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-bold">
+          <Plus size={20} /> {t('new_job')}
+        </Button>
+      </Link>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -173,15 +197,11 @@ export default function Dashboard({ user }: { user: User }) {
             title: t('active_jobs'),
             value: jobs.length.toString(),
             icon: <Briefcase size={24} />,
-            color: "text-blue-500",
-            bg: "bg-blue-50 dark:bg-blue-900/20"
           },
           {
             title: t('total_candidates'),
             value: candidates.length.toString(),
             icon: <Users size={24} />,
-            color: "text-emerald-500",
-            bg: "bg-emerald-50 dark:bg-emerald-900/20"
           },
           {
             title: "Activity",
@@ -191,26 +211,16 @@ export default function Dashboard({ user }: { user: User }) {
               return c.createdAt?.toDate?.() > d;
             }).length).toString(),
             icon: <Activity size={24} />,
-            color: "text-amber-500",
-            bg: "bg-amber-50 dark:bg-amber-900/20"
           }
         ].map((item, i) => (
-          <motion.div 
-            key={i} 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.1 }}
-            whileHover={{ y: -5 }}
-          >
-            <Card className="rounded-3xl shadow-sm bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-zinc-200 dark:border-zinc-800 transition-all">
-              <CardContent className="p-8 flex justify-between items-center">
-                <div className="space-y-1">
-                  <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase text-[10px] tracking-widest">{item.title}</p>
-                  <h2 className="text-5xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tighter">{item.value}</h2>
+          <motion.div key={i} whileHover={{ scale: 1.03 }}>
+            <Card className="rounded-2xl shadow-md">
+              <CardContent className="p-6 flex justify-between items-center">
+                <div>
+                  <p className="text-gray-500">{item.title}</p>
+                  <h2 className="text-4xl font-bold">{item.value}</h2>
                 </div>
-                <div className={cn("p-4 rounded-2xl transition-colors", item.bg, item.color)}>
-                  {item.icon}
-                </div>
+                <div className="text-blue-500">{item.icon}</div>
               </CardContent>
             </Card>
           </motion.div>
@@ -233,7 +243,7 @@ export default function Dashboard({ user }: { user: User }) {
             </div>
             
             <div className="h-[350px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorCandidates" x1="0" y1="0" x2="0" y2="1">

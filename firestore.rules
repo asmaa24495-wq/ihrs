@@ -73,11 +73,12 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidUser(data) {
-      return hasOnlyAllowedFields(['name', 'email', 'companyName', 'role', 'uid']) &&
+      return hasOnlyAllowedFields(['name', 'email', 'companyName', 'role', 'uid', 'photoURL']) &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              isValidEmail(data.email) &&
              (data.role in ['admin', 'recruiter']) &&
              (!('companyName' in data) || (data.companyName is string && data.companyName.size() < 100)) &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 1000)) &&
              (!('uid' in data) || (data.uid is string && data.uid == request.auth.uid));
     }
 
@@ -112,9 +113,9 @@ service cloud.firestore {
     // ===============================================================
 
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (isOwner(userId) && request.resource.data.role == 'recruiter' || isAdmin());
-      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (isOwner(userId) && request.resource.data.role == resource.data.role || isAdmin());
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (request.auth.uid == userId && request.resource.data.role == 'recruiter' || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (request.auth.uid == userId && request.resource.data.role == resource.data.role || isAdmin());
     }
 
     match /jobs/{jobId} {
