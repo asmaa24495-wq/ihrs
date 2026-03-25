@@ -255,10 +255,12 @@ function Login() {
     setLoading(true);
     try {
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        console.log('User created:', userCredential.user);
         toast.success(t('account_created'));
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log('User logged in:', userCredential.user);
         toast.success(t('logged_in'));
       }
     } catch (err: any) {
@@ -266,6 +268,7 @@ function Login() {
       
       if (err.code === 'auth/email-already-in-use') {
         errorMessage = t('email_already_in_use');
+        setIsSignUp(false); // Switch to sign-in mode automatically
       }
       
       setError(errorMessage);
