@@ -123,10 +123,6 @@ export default function Dashboard({ user }: { user: User }) {
     toast.info(t('recent_activity'));
   };
 
-  const handleProfile = () => {
-    toast.info(user.name);
-  };
-
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-20">
       {/* Top Bar */}
@@ -152,16 +148,16 @@ export default function Dashboard({ user }: { user: User }) {
             <Bell size={20} className="text-zinc-500 dark:text-zinc-400" />
             <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-950" />
           </Button>
-          <div 
-            className="h-10 w-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-sm font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-700 cursor-pointer overflow-hidden"
-            onClick={handleProfile}
+          <Link 
+            to="/profile"
+            className="h-10 w-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-sm font-bold text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-700 cursor-pointer overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all"
           >
             {user.photoURL ? (
               <img src={user.photoURL} className="h-full w-full object-cover" alt={user.name} referrerPolicy="no-referrer" />
             ) : (
-              user.name[0]
+              (user.name || '?')[0]
             )}
-          </div>
+          </Link>
         </div>
       </div>
 

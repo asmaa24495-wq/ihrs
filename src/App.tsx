@@ -14,7 +14,7 @@ import { User } from './types';
 import { Button, Input, cn } from './components/UI';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from './ThemeContext';
-import { LayoutDashboard, Briefcase, LogOut, BrainCircuit, PlusCircle, Sun, Moon, Languages, Users } from 'lucide-react';
+import { LayoutDashboard, Briefcase, LogOut, BrainCircuit, PlusCircle, Sun, Moon, Languages, Users, User as UserIcon, Mail, Settings } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 
 // Pages
@@ -22,6 +22,8 @@ import Dashboard from './pages/Dashboard';
 import CreateJob from './pages/CreateJob';
 import JobDetails from './pages/JobDetails';
 import CandidateDetails from './pages/CandidateDetails';
+import Profile from './pages/Profile';
+import SettingsPage from './pages/Settings';
 import Candidates from './pages/Candidates';
 
 function App() {
@@ -108,6 +110,8 @@ function App() {
           <NavLink to="/" icon={<LayoutDashboard size={18} />} label={t('dashboard')} />
           <NavLink to="/candidates" icon={<Users size={18} />} label={t('candidates')} />
           <NavLink to="/jobs/new" icon={<PlusCircle size={18} />} label={t('new_job')} />
+          <NavLink to="/profile" icon={<UserIcon size={18} />} label={t('profile')} />
+          <NavLink to="/settings" icon={<Settings size={18} />} label={t('settings')} />
         </nav>
 
         <div className="mt-auto space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
@@ -131,19 +135,19 @@ function App() {
             </Button>
           </div>
 
-          <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4 px-2">
+          <Link to="/profile" className="flex items-center space-x-3 rtl:space-x-reverse mb-4 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 rounded-xl transition-colors">
             <div className="h-8 w-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold dark:text-zinc-50 overflow-hidden">
               {user.photoURL ? (
                 <img src={user.photoURL} className="h-full w-full object-cover" alt={user.name} referrerPolicy="no-referrer" />
               ) : (
-                user.name[0]
+                (user.name || '?')[0]
               )}
             </div>
             <div className="flex-1 overflow-hidden">
               <p className="text-sm font-medium truncate dark:text-zinc-50">{user.name}</p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">{user.role}</p>
             </div>
-          </div>
+          </Link>
           <Button 
             variant="ghost" 
             className="w-full justify-start text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
@@ -164,6 +168,8 @@ function App() {
           <Route path="/jobs/:jobId/edit" element={<CreateJob user={user} />} />
           <Route path="/jobs/:jobId" element={<JobDetails user={user} />} />
           <Route path="/jobs/:jobId/candidates/:candidateId" element={<CandidateDetails user={user} />} />
+          <Route path="/profile" element={<Profile user={user} />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>
     </div>
@@ -225,6 +231,14 @@ function Login() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (password.length < 6) {
+      const msg = t('password_too_short');
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
     setLoading(true);
     try {
       if (isSignUp) {
@@ -236,7 +250,12 @@ function Login() {
       }
       navigate('/');
     } catch (err: any) {
-      const errorMessage = isSignUp ? t('error_creating_account') : t('invalid_email_password');
+      let errorMessage = isSignUp ? t('error_creating_account') : t('invalid_email_password');
+      
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage = t('email_already_in_use');
+      }
+      
       setError(errorMessage);
       toast.error(errorMessage);
       console.error(err);
@@ -263,6 +282,7 @@ function Login() {
             value={email} 
             onChange={(e) => setEmail(e.target.value)} 
             required 
+            icon={<Mail size={16} />}
             className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50"
           />
           <Input 
@@ -271,6 +291,7 @@ function Login() {
             value={password} 
             onChange={(e) => setPassword(e.target.value)} 
             required 
+            icon={<Briefcase size={16} />}
             className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50"
           />
           {error && <p className="text-xs text-red-500">{error}</p>}

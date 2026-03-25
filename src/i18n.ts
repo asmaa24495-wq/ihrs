@@ -5,7 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   en: {
     translation: {
-      "app_name": "AI Recruitment Hub",
+      "app_name": "Hiremind",
       "dashboard": "Dashboard",
       "new_job": "New Job Posting",
       "active_jobs": "Active Jobs",
@@ -75,14 +75,35 @@ const resources = {
       "error_creating_account": "Error creating account. Please try again.",
       "google_login": "Sign in with Google",
       "popup_closed": "Login window was closed before completion. Please try again.",
+      "email_already_in_use": "This email is already registered. Please sign in instead.",
+      "password_too_short": "Password must be at least 6 characters long.",
       "welcome_user": "Hello, {{email}} 👋",
       "welcome_back": "Welcome back 👋",
-      "manage_system": "Manage your recruitment system"
+      "manage_system": "Manage your recruitment system",
+      "profile": "Profile",
+      "settings": "Settings",
+      "edit_profile": "Edit Profile",
+      "save_changes": "Save Changes",
+      "profile_updated": "Profile updated successfully!",
+      "name": "Name",
+      "appearance": "Appearance",
+      "appearance_desc": "Customize how the app looks for you",
+      "language_desc": "Change the interface language",
+      "toggle": "Toggle",
+      "change": "Change",
+      "notifications": "Notifications",
+      "notifications_desc": "Manage your alert preferences",
+      "email_notifications": "Email Alerts",
+      "coming_soon": "Coming soon",
+      "privacy_security": "Privacy & Security",
+      "privacy_desc": "Manage your account security",
+      "change_password": "Change Password",
+      "two_factor_auth": "Two-Factor Authentication"
     }
   },
   ar: {
     translation: {
-      "app_name": "مركز التوظيف بالذكاء الاصطناعي",
+      "app_name": "Hiremind",
       "dashboard": "لوحة القيادة",
       "new_job": "إعلان وظيفة جديد",
       "active_jobs": "الوظائف النشطة",
@@ -152,9 +173,30 @@ const resources = {
       "error_creating_account": "خطأ في إنشاء الحساب. يرجى المحاولة مرة أخرى.",
       "google_login": "تسجيل باستخدام Google",
       "popup_closed": "تم إغلاق نافذة تسجيل الدخول قبل الإكمال. يرجى المحاولة مرة أخرى.",
+      "email_already_in_use": "هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول بدلاً من ذلك.",
+      "password_too_short": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
       "welcome_user": "مرحبًا، {{email}} 👋",
       "welcome_back": "مرحبًا بك 👋",
-      "manage_system": "إدارة نظام التوظيف الخاص بك"
+      "manage_system": "إدارة نظام التوظيف الخاص بك",
+      "profile": "الملف الشخصي",
+      "settings": "الإعدادات",
+      "edit_profile": "تعديل الملف الشخصي",
+      "save_changes": "حفظ التغييرات",
+      "profile_updated": "تم تحديث الملف الشخصي بنجاح!",
+      "name": "الاسم",
+      "appearance": "المظهر",
+      "appearance_desc": "تخصيص شكل التطبيق بالنسبة لك",
+      "language_desc": "تغيير لغة الواجهة",
+      "toggle": "تبديل",
+      "change": "تغيير",
+      "notifications": "الإشعارات",
+      "notifications_desc": "إدارة تفضيلات التنبيه الخاصة بك",
+      "email_notifications": "تنبيهات البريد الإلكتروني",
+      "coming_soon": "قريباً",
+      "privacy_security": "الخصوصية والأمان",
+      "privacy_desc": "إدارة أمان حسابك",
+      "change_password": "تغيير كلمة المرور",
+      "two_factor_auth": "المصادقة الثنائية"
     }
   }
 };
