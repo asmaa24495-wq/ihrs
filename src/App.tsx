@@ -41,13 +41,23 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        setLoading(true);
         try {
           const userDocRef = doc(db, 'users', firebaseUser.uid);
           let userDoc;
           try {
             userDoc = await getDoc(userDocRef);
           } catch (error) {
-            handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+            console.error('Error fetching user doc:', error);
+            // Fallback to basic user info if Firestore fails
+            setUser({
+              uid: firebaseUser.uid,
+              name: firebaseUser.displayName || 'User',
+              email: firebaseUser.email || '',
+              photoURL: firebaseUser.photoURL || undefined,
+              role: 'recruiter',
+            });
+            setLoading(false);
             return;
           }
 
@@ -66,7 +76,8 @@ function App() {
               await setDoc(userDocRef, newUser);
               setUser(newUser);
             } catch (error) {
-              handleFirestoreError(error, OperationType.WRITE, `users/${firebaseUser.uid}`);
+              console.error('Error creating user doc:', error);
+              setUser(newUser); // Set locally anyway
             }
           }
         } catch (error) {
@@ -213,15 +224,17 @@ function Login() {
     try {
       await signInWithPopup(auth, provider);
       toast.success(t('logged_in'));
-      navigate('/');
+      // No need to navigate, onAuthStateChanged will handle it
     } catch (error: any) {
       console.error('Login failed', error);
       if (error.code === 'auth/popup-closed-by-user') {
         toast.error(t('popup_closed'));
       } else if (error.code === 'auth/cancelled-popup-request') {
-        // Ignore this one, it happens when another popup is opened
+        // Ignore
+      } else if (error.code === 'auth/popup-blocked') {
+        toast.error('Popup blocked by browser. Please allow popups for this site.');
       } else {
-        toast.error(t('invalid_email_password'));
+        toast.error(t('login_failed_generic'));
       }
     } finally {
       setGoogleLoading(false);
@@ -248,7 +261,6 @@ function Login() {
         await signInWithEmailAndPassword(auth, email, password);
         toast.success(t('logged_in'));
       }
-      navigate('/');
     } catch (err: any) {
       let errorMessage = isSignUp ? t('error_creating_account') : t('invalid_email_password');
       
@@ -322,15 +334,26 @@ function Login() {
             {t('google_login')}
           </Button>
           
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <button 
               onClick={() => setIsSignUp(!isSignUp)}
               className="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
             >
               {isSignUp ? t('already_have_account') : t('dont_have_account')}
             </button>
+            <div className="pt-2">
+              <button 
+                onClick={() => signOut(auth)}
+                className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 underline"
+              >
+                {t('clear_session')}
+              </button>
+            </div>
           </div>
 
+          <p className="text-center text-[10px] text-zinc-400 dark:text-zinc-500">
+            {t('popup_help')}
+          </p>
           <p className="text-center text-[10px] text-zinc-400 dark:text-zinc-500">
             By signing in, you agree to our Terms of Service and Privacy Policy.
           </p>
